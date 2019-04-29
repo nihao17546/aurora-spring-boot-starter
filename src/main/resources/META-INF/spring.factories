@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.appcnd.aurora.spring.boot.autoconfigure.AuroraAutoConfigure
