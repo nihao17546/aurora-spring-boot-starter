@@ -29,8 +29,7 @@ public class MysqlConfiguration {
     @Qualifier(PollerMetadata.DEFAULT_POLLER)
     private PollerSpec spec;
 
-    @Bean(name = BeanNameConstant.MYSQL_DATA_SOURCE_BEAN_NAME)
-    public DataSource dataSource() {
+    private DataSource dataSource() {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(mysqlProperties.getUrl());
         dataSource.setUsername(mysqlProperties.getUsername());
@@ -54,9 +53,8 @@ public class MysqlConfiguration {
     }
 
     @Bean(name = BeanNameConstant.MYSQL_JDBC_CHANNEL_MESSAGE_STORE_BEAN_NAME)
-    public JdbcChannelMessageStore jdbcChannelMessageStore(@Autowired @Qualifier(BeanNameConstant.MYSQL_DATA_SOURCE_BEAN_NAME)
-                                                                       DataSource dataSource) {
-        JdbcChannelMessageStore jdbcChannelMessageStore = new JdbcChannelMessageStore(dataSource);
+    public JdbcChannelMessageStore jdbcChannelMessageStore() {
+        JdbcChannelMessageStore jdbcChannelMessageStore = new JdbcChannelMessageStore(dataSource());
         jdbcChannelMessageStore.setChannelMessageStoreQueryProvider(new MySqlChannelMessageStoreQueryProvider());
         return jdbcChannelMessageStore;
     }
