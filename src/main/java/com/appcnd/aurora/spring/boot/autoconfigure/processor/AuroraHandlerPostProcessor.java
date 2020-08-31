@@ -19,6 +19,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.integration.amqp.inbound.AmqpInboundChannelAdapter;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -60,19 +61,17 @@ public class AuroraHandlerPostProcessor implements BeanPostProcessor,Application
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof AuroraMessageHandler) {
             AuroraMessageHandler handler = (AuroraMessageHandler) bean;
-            Annotation[] annotations = handler.getClass().getAnnotations();
-            for (Annotation annotation : annotations) {
-                if (annotation instanceof MysqlListener) {
-                    processMysql(((MysqlListener) annotation).groupId(), beanName, handler);
-                    break;
-                } else if (annotation instanceof RabbitListener) {
-                    processRabbit(((RabbitListener) annotation).queueName(), beanName, handler);
-                    break;
-                } else if (annotation instanceof ActiveListener) {
-                    processActive(((ActiveListener) annotation).destinationName(),
-                            ((ActiveListener) annotation).topic(), beanName, handler);
-                    break;
-                }
+            MysqlListener mysqlListener = AnnotationUtils.findAnnotation(handler.getClass(), MysqlListener.class);
+            if (mysqlListener != null) {
+                processMysql(mysqlListener.groupId(), beanName, handler);
+            }
+            RabbitListener rabbitListener = AnnotationUtils.findAnnotation(handler.getClass(), RabbitListener.class);
+            if (rabbitListener != null) {
+                processRabbit(rabbitListener.queueName(), beanName, handler);
+            }
+            ActiveListener activeListener = AnnotationUtils.findAnnotation(handler.getClass(), ActiveListener.class);
+            if (activeListener != null) {
+                processActive(activeListener.destinationName(), activeListener.topic(), beanName, handler);
             }
         }
         return bean;
